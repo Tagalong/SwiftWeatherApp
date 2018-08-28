@@ -37,7 +37,7 @@ class Networking: NSObject {
             
             if data != nil{
                 
-                print("Data exists in networking")
+                
                 self.delegate?.didGetResult(data: data!)
                 
                 

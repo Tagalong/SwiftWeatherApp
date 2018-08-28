@@ -49,7 +49,7 @@ class ViewController: UIViewController, NetworkingDelegate {
                 
                 let newJSONDecoder = JSONDecoder()
                 let weatherObject = try newJSONDecoder.decode(WeatherObj.self, from:data!)
-                print(weatherObject)
+//                print(weatherObject)
                 let dailyObject = weatherObject.daily
                 let dataArray = dailyObject.data
             
@@ -57,46 +57,20 @@ class ViewController: UIViewController, NetworkingDelegate {
 
                     
                 self.modelArray.append(val)
+                    
                 }
             } catch {
                 print("error while parsing:\(error.localizedDescription)")
             }
 
         DispatchQueue.main.async {
-            self.buildSlides(slidesArray: self.modelArray)
+            
+            print(self.slidesArray)
+              self.setupSlideScrollView(slides: self.slidesArray, modelArray: self.modelArray)
         }
         }
     
-    func buildSlides(slidesArray: [DayWeather]) -> Void{
-        
-        //call setupSlideScrollView pass in DayWeather array
-        
-        for modelObject in slidesArray{
-            
-            print(modelObject)
-            
-            let slide: Slide = Slide()
-            print(slide)
-            self.slidesArray.append(slide)
-            
-            //crash is occurring because views have not been added as subviews
-            let hiLabelText: String = String(format:"%f", modelObject.temperatureHigh)
-            slide.hiLabel.text = hiLabelText
-            
-            let loLabelText: String = String(format: "%f", modelObject.temperatureLow)
-            slide.loLabel.text = loLabelText
-            
-            let humidityText: String = String(format: "%f%", modelObject.humidity * 100)
-            slide.humidityLabel.text = humidityText
-            
-            let imageName = self.displayImage(name: modelObject.icon)
-            slide.descriptionImage.image = UIImage(named: imageName)
-            
-            slide.descriptionLabel.text = modelObject.summary
-            
-        }
-        self.setupSlideScrollView(slides: self.slidesArray)
-    }
+   
         
     func displayImage(name: String)->String {
         switch name {
@@ -124,20 +98,48 @@ class ViewController: UIViewController, NetworkingDelegate {
         }
     }
     
-    func setupSlideScrollView(slideData : [Slide]) {
+    func setupSlideScrollView(slides : [Slide], modelArray: [DayWeather]) {
         scrollview.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height)
-        scrollview.contentSize = CGSize(width: view.frame.width * CGFloat(slideData.count), height: view.frame.height)
+        scrollview.contentSize = CGSize(width: view.frame.width * CGFloat(slides.count), height: view.frame.height)
         scrollview.isPagingEnabled = true
         
-        for i in 0 ..< slideData.count {
-            slideData[i].frame = CGRect(x: view.frame.width * CGFloat(i), y: 0, width: view.frame.width, height: view.frame.height)
-            scrollview.addSubview(slideData[i])
+        for i in 0 ..< slides.count {
+            slides[i].frame = CGRect(x: view.frame.width * CGFloat(i), y: 0, width: view.frame.width, height: view.frame.height)
+            let slide: Slide = Slide()
+            print(slide)
+            self.slidesArray.append(slide)
+            scrollview.addSubview(slides[i])
             
-            let slideData[i] as? 
+            let dayWeather: DayWeather = modelArray[i]
             
-            slideData[i].hiLabel.text = String(format:"%f", slideData[i].temperatureHigh)
+            slides[i].descriptionLabel.text = dayWeather.summary
+            slides[i].hiLabel.text = String(format: "%f", dayWeather.temperatureHigh)
+            slides[i].loLabel.text = String(format: "%f", dayWeather.temperatureLow)
+            let humidityText: Double = dayWeather.humidity * 100
+            slides[i].humidityLabel.text = String(format: "%f%", humidityText)
+            let iconName = self.displayImage(name: dayWeather.icon)
+            slides[i].descriptionImage.image = UIImage(imageLiteralResourceName: iconName)
             
-            let hiLabelText: String =
+            print("slides description: \(slides[i].descriptionLabel.text!)")
+            slides[i].setNeedsDisplay()
+            
+        }
+    }
+    
+    func buildSlides(slidesArray: [DayWeather]) -> Void{
+        
+        //call setupSlideScrollView pass in DayWeather array
+        
+        for modelObject in slidesArray{
+            
+//            print(modelObject)
+            
+            let slide: Slide = Slide()
+            print(slide)
+            self.slidesArray.append(slide)
+            
+            //crash is occurring because views have not been added as subviews
+            let hiLabelText: String = String(format:"%f", modelObject.temperatureHigh)
             slide.hiLabel.text = hiLabelText
             
             let loLabelText: String = String(format: "%f", modelObject.temperatureLow)
@@ -150,7 +152,9 @@ class ViewController: UIViewController, NetworkingDelegate {
             slide.descriptionImage.image = UIImage(named: imageName)
             
             slide.descriptionLabel.text = modelObject.summary
+            
         }
+        
     }
 
     override func didReceiveMemoryWarning() {
