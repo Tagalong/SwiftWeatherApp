@@ -9,19 +9,29 @@
 import Foundation
 
 
-func myMethod(success:([String])->Void){
-    ref?.observeEventType(.Value, withBlock: { snapshot in
-        var newNames: [String] = []
-        for item in snapshot.children {
-            if let item = item as? FIRDataSnapshot {
-                let postDict = item.value as! [String: String]
-                newNames.append(postDict["name"]!)
-            }
-        }
-        self.didFetchData(newNames)
-    })
+
+struct WeatherObj: Codable {
+    let latitude: Double
+    let longitude: Double
+    let timezone: String
+    let daily: Daily
+    
 }
 
-func didFetchData(data:[String]){
-    //Do what you want
+struct Daily: Codable{
+    let summary: String
+    let icon: String
+    let data: [DayWeather]
 }
+
+struct DayWeather: Codable{
+    
+    let summary: String
+    let icon: String
+    let temperatureHigh: Double
+    let temperatureLow: Double
+    let humidity: Double
+    let time: Int
+    
+}
+

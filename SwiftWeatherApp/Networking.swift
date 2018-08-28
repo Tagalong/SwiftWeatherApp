@@ -8,17 +8,17 @@
 
 import Foundation
 
-protocol NetworkingDelegate {
-    func didGetResule(data: Data) -> Void
+protocol NetworkingDelegate: AnyObject {
+    func didGetResult(data: Data?) -> Void
 }
     
     
 class Networking: NSObject {
     
     var data: Data?
-    
+    weak var delegate: NetworkingDelegate?
 
-    func makeAPIRequest(apiString: String, completion: @escaping (Data) -> Void) -> Void {
+    func makeAPIRequest(apiString: String) -> Void {
         guard let url: URL = URL(string: apiString) else{
             print("ERROR no URL")
             return
@@ -37,13 +37,8 @@ class Networking: NSObject {
             
             if data != nil{
                 
-            
-                dataObject = data!
-                let theString:NSString = NSString(data: data!, encoding: String.Encoding.ascii.rawValue)!
-                print(theString)
-                DispatchQueue.main.async {
-                    completion(data!)
-                }
+                print("Data exists in networking")
+                self.delegate?.didGetResult(data: data!)
                 
                 
                 
