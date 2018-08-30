@@ -18,6 +18,7 @@
 		044AA1E42133D3F700DB1B57 /* WeatherObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0443D66E2132749B00E8FB99 /* WeatherObjects.swift */; };
 		04BFD6CF213373A0000C00F0 /* Slide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04BFD6CE213373A0000C00F0 /* Slide.swift */; };
 		04BFD6D1213373BC000C00F0 /* Slide.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04BFD6D0213373BC000C00F0 /* Slide.xib */; };
+		04D4D67021362811005F56AD /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04D4D66F21362811005F56AD /* CoreLocation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +56,7 @@
 		0443D66E2132749B00E8FB99 /* WeatherObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherObjects.swift; sourceTree = "<group>"; };
 		04BFD6CE213373A0000C00F0 /* Slide.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Slide.swift; sourceTree = "<group>"; };
 		04BFD6D0213373BC000C00F0 /* Slide.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = Slide.xib; sourceTree = "<group>"; };
+		04D4D66F21362811005F56AD /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +64,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04D4D67021362811005F56AD /* CoreLocation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,6 +92,7 @@
 				0443D6502132747300E8FB99 /* SwiftWeatherAppTests */,
 				0443D65B2132747300E8FB99 /* SwiftWeatherAppUITests */,
 				0443D63A2132746E00E8FB99 /* Products */,
+				04D4D66E21362810005F56AD /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -135,6 +139,14 @@
 				0443D65E2132747300E8FB99 /* Info.plist */,
 			);
 			path = SwiftWeatherAppUITests;
+			sourceTree = "<group>";
+		};
+		04D4D66E21362810005F56AD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				04D4D66F21362811005F56AD /* CoreLocation.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -447,7 +459,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = F9HVN6V4F6;
 				INFOPLIST_FILE = SwiftWeatherApp/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -464,7 +478,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = F9HVN6V4F6;
 				INFOPLIST_FILE = SwiftWeatherApp/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

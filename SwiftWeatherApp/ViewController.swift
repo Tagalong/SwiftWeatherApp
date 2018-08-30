@@ -7,38 +7,70 @@
 //
 
 import UIKit
+import CoreLocation
 
 
 
-
-
-
-class ViewController: UIViewController, NetworkingDelegate {
-
+class ViewController: UIViewController, NetworkingDelegate, CLLocationManagerDelegate {
+    let locationManager: CLLocationManager = CLLocationManager()
     var slidesArray: [Slide] = []
     var modelArray: [DayWeather] = []
+    var lat: String?
+    var long: String?
+   
     @IBOutlet weak var pageControl: UIPageControl!
     @IBOutlet weak var scrollview: UIScrollView!
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         
-        enum Weather : String {
-            case  clear_day, clear_night, rain, snow, sleet, wind, fog, partly_cloudy_day, partly_cloudy_night, cloudy
-            
-        }
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.startMonitoringSignificantLocationChanges()
+        locationManager.startUpdatingLocation()
         
+    }
+    
+
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        for currentLocation in locations{
+            print("\(index)\(currentLocation)")
+        }
+        print("Did Location Delegate get called?")
+        let location: CLLocation = locations.first as! CLLocation
+        print(location)
+        self.lat = String(format: "%f", location.coordinate.latitude)
+        self.long = String(format: "%f", location.coordinate.longitude)
+        locationManager.stopUpdatingLocation()
+        
+        self.getWeatherData(latitude: self.lat!, longitude: self.long!)
+    }
+    
+    
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        
+        let alert: UIAlertController = UIAlertController(title: "Error", message: "There was an error getting your location", preferredStyle:UIAlertControllerStyle(rawValue: 1)!)
+        
+        
+        alert.show(self, sender: nil)
+    }
+    
+    
+
+    
+    func getWeatherData(latitude: String, longitude: String) -> Void {
+        print("Did getWeatherData get called?")
         let apiKey: String = "2fb4add23bc2288f44ca26618eae7061"
-        let lat: String = "34.088051"
-        let long: String = "-118.296512"
-        let apiString: String = "https://api.darksky.net/forecast/\(apiKey)/\(lat),\(long)?exclude=currently,minutely,hourly"
+        let apiString: String = "https://api.darksky.net/forecast/\(apiKey)/\(latitude),\(longitude)?exclude=currently,minutely,hourly"
         
         let networking = Networking()
         networking.delegate = self
         networking.makeAPIRequest(apiString: apiString)
-        
-        
-        
     }
     
     func didGetResult(data: Data?) {
@@ -49,7 +81,6 @@ class ViewController: UIViewController, NetworkingDelegate {
                 
                 let newJSONDecoder = JSONDecoder()
                 let weatherObject = try newJSONDecoder.decode(WeatherObj.self, from:data!)
-//                print(weatherObject)
                 let dailyObject = weatherObject.daily
                 let dataArray = dailyObject.data
             
@@ -65,18 +96,20 @@ class ViewController: UIViewController, NetworkingDelegate {
 
         DispatchQueue.main.async {
             
-            print(self.slidesArray)
-              self.setupSlideScrollView(slides: self.slidesArray, modelArray: self.modelArray)
+            self.buildSlides(slidesArray: self.modelArray)
+            self.modelArray = []
+            }
+        
         }
-        }
+
     
    
         
     func displayImage(name: String)->String {
         switch name {
-        case "clear_day":
+        case "clear-day":
             return "sunny.png"
-        case "clear_night":
+        case "clear-night":
             return "clearnight.png"
         case "rain":
             return "rainy.png"
@@ -88,9 +121,9 @@ class ViewController: UIViewController, NetworkingDelegate {
             return "windy.png"
         case "fog":
             return "foggy.png"
-        case "partly_cloudy_day":
+        case "partly-cloudy-day":
             return "partiallycloudy.png"
-        case "partly_cloudy_night":
+        case "partly-cloudy-night":
             return "cloudynight.png"
         case "cloudy":
             return "overcast.png"
@@ -98,69 +131,80 @@ class ViewController: UIViewController, NetworkingDelegate {
         }
     }
     
-    func setupSlideScrollView(slides : [Slide], modelArray: [DayWeather]) {
+    func setupSlideScrollView(slides: [Slide]) {
+        
+        let viewsToRemove: [UIView] = self.scrollview.subviews
+        for views in viewsToRemove {
+            views.removeFromSuperview()
+        }
         scrollview.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height)
         scrollview.contentSize = CGSize(width: view.frame.width * CGFloat(slides.count), height: view.frame.height)
         scrollview.isPagingEnabled = true
         
         for i in 0 ..< slides.count {
             slides[i].frame = CGRect(x: view.frame.width * CGFloat(i), y: 0, width: view.frame.width, height: view.frame.height)
-            let slide: Slide = Slide()
-            print(slide)
-            self.slidesArray.append(slide)
             scrollview.addSubview(slides[i])
-            
-            let dayWeather: DayWeather = modelArray[i]
-            
-            slides[i].descriptionLabel.text = dayWeather.summary
-            slides[i].hiLabel.text = String(format: "%f", dayWeather.temperatureHigh)
-            slides[i].loLabel.text = String(format: "%f", dayWeather.temperatureLow)
-            let humidityText: Double = dayWeather.humidity * 100
-            slides[i].humidityLabel.text = String(format: "%f%", humidityText)
-            let iconName = self.displayImage(name: dayWeather.icon)
-            slides[i].descriptionImage.image = UIImage(imageLiteralResourceName: iconName)
-            
-            print("slides description: \(slides[i].descriptionLabel.text!)")
-            slides[i].setNeedsDisplay()
             
         }
     }
     
+
+    
     func buildSlides(slidesArray: [DayWeather]) -> Void{
         
-        //call setupSlideScrollView pass in DayWeather array
+        let numberFormatter = NumberFormatter()
+        numberFormatter.minimumFractionDigits = 0
+        numberFormatter.maximumFractionDigits = 0
+        numberFormatter.numberStyle = .none
         
         for modelObject in slidesArray{
             
-//            print(modelObject)
+
+            let slide  = Bundle.main.loadNibNamed("Slide", owner: nil, options: nil)![0] as! Slide
+           
+            let highText = numberFormatter.string(from: modelObject.temperatureHigh as NSNumber) ?? "n/a"
             
-            let slide: Slide = Slide()
-            print(slide)
-            self.slidesArray.append(slide)
+           
+            slide.hiLabel.text = "High: \(highText)°"
             
-            //crash is occurring because views have not been added as subviews
-            let hiLabelText: String = String(format:"%f", modelObject.temperatureHigh)
-            slide.hiLabel.text = hiLabelText
+            let loLabelText: String = numberFormatter.string(from: modelObject.temperatureLow as NSNumber) ?? "n/a"
+            slide.loLabel.text = "Low: \(loLabelText)°"
             
-            let loLabelText: String = String(format: "%f", modelObject.temperatureLow)
-            slide.loLabel.text = loLabelText
             
-            let humidityText: String = String(format: "%f%", modelObject.humidity * 100)
-            slide.humidityLabel.text = humidityText
+            let humidityDegree: Double = modelObject.humidity * 100
+            let humidityText: String = numberFormatter.string(from: humidityDegree as NSNumber) ?? "n/a"
+            slide.humidityLabel.text = "Humidity: \(humidityText)°"
             
-            let imageName = self.displayImage(name: modelObject.icon)
+            let imageName = displayImage(name: modelObject.icon)
             slide.descriptionImage.image = UIImage(named: imageName)
             
             slide.descriptionLabel.text = modelObject.summary
             
+            let timeDouble: Double = Double(modelObject.time)
+            let date = Date(timeIntervalSince1970: timeDouble)
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "MM-dd"
+                
+            dateFormatter.locale = NSLocale(localeIdentifier: "@en-US") as Locale?
+                let localDate = dateFormatter.string(from: date)
+            slide.dayLabel.text = localDate
+            print("Slide \(slide)")
+            self.slidesArray.append(slide)
+            
         }
         
+        self.setupSlideScrollView(slides: self.slidesArray)
+        self.slidesArray = []
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
+ override func viewDidDisappear(_ animated: Bool) {
+        locationManager.stopUpdatingLocation()
+    }
+
 
 }
-
